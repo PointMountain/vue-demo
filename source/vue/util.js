@@ -11,8 +11,11 @@ export const util = {
     }, vm)
   },
   compilerText(node, vm) { // 编译文本 替换{{}}
-    node.textContent = node.textContent.replace(defaultRE, function (...args) {
-      return util.getValue(vm, args[1])
+    if(!node.expr){
+      node.expr = node.textContent // 给节点增加一个自定义属性 为了方便后续更新操作
+    }
+    node.textContent = node.expr.replace(defaultRE, function (...args) {
+      return JSON.stringify(util.getValue(vm, args[1]))
     })
   }
 }

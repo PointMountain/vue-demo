@@ -19,6 +19,15 @@ export function observerArray(inserted) { // 要循环数组一次对数组中�
     observe(inserted[i])
   }
 }
+export function dependArray(value) {
+  for (let i = 0; i < value.length; i++) {
+    let currentItem = value[i]
+    currentItem.__ob__ && currentItem.__ob__.dep.depend()
+    if (Array.isArray(currentItem)) {
+      dependArray(currentItem)  // 不停的收集 数组中的依赖关系
+    }
+  }
+}
 
 methods.forEach(method => {
   arrayMethods[method] = function (...args) { // 函数劫持 切片编程
@@ -37,6 +46,7 @@ methods.forEach(method => {
     }
     if (inserted) observerArray(inserted)
     console.log('调用了数组更新的方法')
+    this.__ob__.dep.notify()
     return r
   }
 })

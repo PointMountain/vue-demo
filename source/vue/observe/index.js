@@ -18,6 +18,9 @@ export function observe(data) {
   if (typeof data !== 'object' || data == null) {
     return
   }
+  if(data.__ob__){ // 已经被监控过了
+    return data.__ob__
+  }
   return new Observer(data)
 }
 

@@ -9,9 +9,7 @@ const vm = new Vue({
         name: 'zf',
         age: 10
       },
-      arr: [{
-        a: 1
-      }, 1, 2]
+      arr: [[1], 1, 2]
     }
   },
   computed: {
@@ -22,3 +20,14 @@ const vm = new Vue({
   }
 })
 console.log(vm)
+setTimeout(() => {
+  vm.msg = 'world'
+  vm.msg = 'world1'
+  vm.msg = 'world2'
+  vm.msg = 'world3'
+  vm.school.name = '1321'
+  vm.school.name = 'zf'
+
+  vm.arr[0].push(10)
+  vm.arr.push(100)
+}, 1000)

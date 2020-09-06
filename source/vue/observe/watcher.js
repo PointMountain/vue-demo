@@ -36,9 +36,64 @@ class Watcher {
       dep.addSub(this)
     }
   }
-  update(){
+  update(){ // 如果立即调用get 会导致页面刷新 异步来更新
+    queueWatcher(this)
+  }
+  run(){
     this.get()
   }
 }
+
+let has = {}
+let queue = []
+function flushQueue() {
+  // 等待当前这一轮全部更新后 再去让watcher依次执行
+  queue.forEach(watcher => watcher.run())
+  has = {}
+  queue = []
+}
+function queueWatcher(watcher) {
+  let id = watcher.id
+  if(has[id] == null){
+    has[id] = true
+    queue.push(watcher)  // 相同的watcher只会存一个到queue中
+
+    // 延迟清空队列
+    nextTick(flushQueue)
+    // setTimeout(flushQueue, 0)
+  }
+}
+
 // 渲染使用他 计算属性也要用他 vm.watch 也用他
+let callbacks = []
+function flushCallback(){
+  callbacks.forEach(cb => cb())
+}
+export function nextTick(cb) { // cb就是flushQueue
+  callbacks.push(cb)
+
+  // 要异步刷新callbacks 获取一个异步的方法
+  //                      微任务                     宏任务
+  // 先采用微任务 会先执行(promise mutationObserver) setImmediate setTimeout
+  let timerFunc = () => {
+    flushCallback()
+  }
+  if(Promise){
+    return Promise.resolve().then(timerFunc)
+  }
+  if(MutationObserver){
+    let observer = new MutationObserver(timerFunc)
+    let textNode = document.createTextNode(1)
+    observer.observe(textNode, {characterData: true})
+    textNode.textContent = 2
+    return
+  }
+  if(setImmediate){
+    return setImmediate(timerFunc)
+  }
+  setTimeout(timerFunc, 0)
+}
+
+// 等待页面更新后再去获取dom元素
+
 export default Watcher

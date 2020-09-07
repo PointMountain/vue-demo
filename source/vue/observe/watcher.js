@@ -1,4 +1,5 @@
 import { pushTarget, popTarget } from './dep'
+import { util } from '../util'
 let id = 0
 class Watcher {
   /**
@@ -13,20 +14,28 @@ class Watcher {
     this.exprOrFn = exprOrFn
     if(typeof exprOrFn === 'function'){
       this.getter = exprOrFn  // getter就是new Watcher传入的第二个函数
+    }else{
+      this.getter = function() { // 如果调用此方法 会将vm上对应的表达式取出
+        return util.getValue(vm, exprOrFn)
+      }
+    }
+    if(opts.user){ // 标识是用户自己写的watcher
+      this.user = true
     }
     this.cb = cb
     this.deps = []
     this.depsId = new Set()
     this.opts = opts
     this.id = id++
-
-    this.get()  // 默认创建一个watcher 会调用自身的get方法
+    // 创建watcher的时候 先将表达式对应的值取出来（老值）
+    this.value = this.get()  // 默认创建一个watcher 会调用自身的get方法
   }
   get(){
     pushTarget(this) // 渲染watcher Dep.target = watcher
     // 默认创建watcher就会调用此方法
-    this.getter() // 让这个当前传入的函数执行
+    let value = this.getter() // 让这个当前传入的函数执行
     popTarget()
+    return value
   }
   addDep(dep){ // 同一个watcher 不应该重复记录dep 让watcher和dep互相记忆
     let id = dep.id
@@ -40,7 +49,10 @@ class Watcher {
     queueWatcher(this)
   }
   run(){
-    this.get()
+    let value = this.get() // 新值
+    if(this.value !== value){
+      this.cb(value, this.value)
+    }
   }
 }
 

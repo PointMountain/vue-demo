@@ -15,7 +15,9 @@ export function defineReactive(data, key, value) { // 定义响应式的数据�
         dep.depend() // 他想让dep 中可以存watcher 还想让watcher中也存放dep 实现一个多对多的关系
         if(childOb){ // 数组的依赖收集
           childOb.dep.depend() // 数组也收集了当前渲染watcher
-          dependArray(value) // 收集儿子的依赖
+          if(Array.isArray(value)){
+            dependArray(value) // 收集儿子的依赖
+          }
         }
       }
       return value

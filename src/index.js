@@ -16,18 +16,21 @@ const vm = new Vue({
 
   },
   watch: {
-
+    msg(newValue, oldValue) {
+      console.log(oldValue, newValue)
+    }
   }
 })
 console.log(vm)
 setTimeout(() => {
-  vm.msg = 'world'
-  vm.msg = 'world1'
-  vm.msg = 'world2'
-  vm.msg = 'world3'
-  vm.school.name = '1321'
-  vm.school.name = 'zf'
+  // vm.msg = 'world'
+  // vm.msg = 'world1'
+  // vm.msg = 'world2'
+  // vm.msg = 'world3'
+  // vm.school.name = '1321'
+  // vm.school.name = 'zf'
 
-  vm.arr[0].push(10)
-  vm.arr.push(100)
+  // vm.arr[0].push(10)
+  // vm.arr.push(100)
+  vm.msg = 'world'
 }, 1000)

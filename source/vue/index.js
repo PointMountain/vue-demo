@@ -68,9 +68,9 @@ Vue.prototype.$mount = function () {
   // 需要让每个数据 更改了 需要重新渲染
 }
 
-Vue.prototype.$watch = function(expr, handler){
+Vue.prototype.$watch = function(expr, handler, opts){
   let vm = this
-  new Watcher(vm, expr, handler, {user: true}) // 标识用户自己定义的watch
+  new Watcher(vm, expr, handler, {user: true, ...opts}) // 标识用户自己定义的watch
 }
 
 export default Vue

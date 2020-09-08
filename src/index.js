@@ -9,18 +9,31 @@ const vm = new Vue({
         name: 'zf',
         age: 10
       },
-      arr: [[1], 1, 2]
+      arr: [
+        [1], 1, 2
+      ],
+      firstName: 'Point',
+      lastName: 'Mountain'
     }
   },
   computed: {
-
+    fullName() {
+      return this.firstName + this.lastName
+    }
   },
   watch: {
-    msg(newValue, oldValue) {
-      console.log(oldValue, newValue)
+    // msg(newValue, oldValue) {
+    //   console.log(oldValue, newValue)
+    // }
+    msg: {
+      handler: (newValue, oldValue) => {
+        console.log(oldValue, newValue)
+      },
+      immediate: true
     }
   }
 })
+
 console.log(vm)
 setTimeout(() => {
   // vm.msg = 'world'
@@ -32,5 +45,6 @@ setTimeout(() => {
 
   // vm.arr[0].push(10)
   // vm.arr.push(100)
-  vm.msg = 'world'
+  // vm.msg = 'world'
+  vm.firstName = '23123'
 }, 1000)

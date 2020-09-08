@@ -1,4 +1,6 @@
 import Observer from './observer'
+import Watcher from './watcher'
+import Dep from './dep'
 
 export function initState(vm) {
   // 做不同的初始化工作
@@ -7,7 +9,7 @@ export function initState(vm) {
     initData(vm) // 初始化数据
   }
   if (opts.computed) {
-    initComputed() // 初始化计算属性
+    initComputed(vm, opts.computed) // 初始化计算属性
   }
   if (opts.watch) {
     initWatch(vm) // 初始化watch
@@ -46,19 +48,48 @@ function initData(vm) { // 将用户插入的数据 通过Object.defineProperty�
   observe(vm._data) // 观察数据
 }
 
-function initComputed() {
-
+function createComputedGetter(vm, key) {
+  let watcher = vm._watchersComputed[key] // 这个watcher就是开始定义的计算属性watcher
+  return function () { // 用户取值是会执行此方法
+    if(watcher){
+      if(watcher.dirty){ // 如果页面取值 且dirty是true 就回去调用watcher的get方法
+        watcher.evaluate()
+      }
+      if(Dep.target){ // watcher 就是计算属性watcher
+        watcher.depend()
+      }
+      return watcher.value
+    }
+  }
 }
 
-function createWatcher(vm, key, handler){
+function initComputed(vm, computed) {
+  // 将计算属性的配置 放到vm上
+  let watchers = vm._watchersComputed = Object.create(null) // 创建存储用户计算属性的watcher对象
+
+  for (const key in computed) {  // { fullName: () => this.firstName + this.lastName }
+    let def = computed[key]
+    watchers[key] = new Watcher(vm, def, () => {}, {lazy: true}) // 计算属性watcher 默认刚开始此方法不会执行
+
+    Object.defineProperty(vm, key, {
+      get: createComputedGetter(vm, key)
+    }) // 将属性定义到vm上
+  }
+}
+
+function createWatcher(vm, key, handler, opts){
   // 内部最终也会使用$watch
-  return vm.$watch(key, handler)
+  return vm.$watch(key, handler, opts)
 }
 
 function initWatch(vm) {
   let watch = vm.$options.watch
   for (const key in watch) { // msg(){}
-    let handler = watch[key]
-    createWatcher(vm, key, handler)
+    let userDef = watch[key]
+    let handler = userDef
+    if(userDef.handler){
+      handler = userDef.handler
+    }
+    createWatcher(vm, key, handler, {immediate: userDef.immediate})
   }
 }
